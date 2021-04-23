@@ -1,0 +1,30 @@
+[
+{
+   "ID": 1,
+   "code": "EWRDE",
+   "price": 3232,
+   "depaturedate": "2006/23/45",
+   "orign": "mufa",
+   "destination": "sfo",
+   "emptyseats":0,
+   "plane":
+   {
+         "type": "Boing 737",
+		"totalseats": 121
+		
+	} 	
+},{	"ID": 2,
+   "code": "SWRDE",
+   "price": 5232,
+   "depaturedate": "2006/22/4",
+   "orign": "mufaq",
+   "destination": "sfe",
+   "emptyseats":0,
+   "plane":
+   {
+         "type": "Boing 537",
+		"totalseats": 124
+   }
+   }
+   ]
+   

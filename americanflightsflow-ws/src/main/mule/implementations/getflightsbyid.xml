@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="getflightsbyidFlow" doc:id="977e885f-3c82-497c-92bf-bc18efae8198" >
+		<http:listener doc:name="Listener" doc:id="d7ed6f47-0a8d-4f80-b4b6-884ed0b00252" path="/getflights/{identification}" config-ref="HTTP_Listener_config"/>
+		<set-variable value="#[attributes.uriParams.identification]" doc:name="Set Variable" doc:id="14e72fe7-58a2-41f0-845c-740d36b6903f" variableName="Flights"/>
+		<db:select doc:name="Select" doc:id="9fb4beb4-b794-46db-a9d6-9036a057e6c6" config-ref="Database_Config">
+			<db:sql ><![CDATA[select *from american where ID = :id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+  id:vars.Flights
+	
+}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="7d7c83ad-4950-4888-a762-e9194e1171cc" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	ID: payload01.ID,
+	code: payload01.code1,
+	price: payload01.price default 0,
+	depaturedate: payload01.takeOffDate as String default "",
+	orign: payload01.fromAirport default "",
+	destination: payload01.toAirport default "",
+	emptyseats: payload01.seatsAvailable default 0,
+	plane: {
+		"type": payload01.planeType default "",
+		totalseats: payload01.totalSeats default 0
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

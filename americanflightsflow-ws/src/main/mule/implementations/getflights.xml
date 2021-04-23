@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	
+	<flow name="getFlightsFlow" doc:id="9e62ba4d-64bc-4d63-8c5a-f7e6c16404c8" >
+		
+		<http:listener doc:name="Listener" doc:id="f2045c10-d1c9-4a3b-997d-c925287eaecf" config-ref="HTTP_Listener_config" path="/publish"/>
+		<ee:transform doc:name="Transform Message" doc:id="8e7f7363-2abf-4c19-ab47-538281a3976f">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload orderBy -$.ID distinctBy $.ID filter($.ID == 10) map ( payload01 , indexOfPayload01 ) -> {
+	ID: payload01.ID,
+	code: payload01.code1,
+	price: payload01.price default 0,
+	depaturedate: payload01.fromAirport default "",
+	orign: payload01.takeOffDate as String default "",
+	destination: payload01.toAirport default "",
+	emptyseats: payload01.totalSeats default 0,
+	plane: {
+		"type": payload01.planeType default "",
+		totalseats: payload01.seatsAvailable default 0
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<vm:publish queueName="sampleQueue" doc:name="Publish" doc:id="9c1feb0e-74ec-4cd8-b646-775a7eff4ed9" config-ref="VM_Config"/>
+	</flow>
+	<flow name="getflightsFlow" doc:id="e89def2e-551c-4769-955a-31b987fd39e6" >
+		<vm:listener queueName="sampleQueue" doc:name="Listener" doc:id="90fe1bcc-fc73-43a2-819e-56cd9115b0ba" config-ref="VM_Config"/>
+		<file:write doc:name="Write" doc:id="19710da7-7f8a-4af9-a052-a2d098ff904b" config-ref="File_Config" path="In1/Sample.xml"/>
+		<logger level="INFO" doc:name="Logger" doc:id="b740671a-2c35-4364-b229-606285ff6538" message="#[payload]"/>
+	</flow>
+	<flow name="postFlightsFlow" doc:id="34fb476b-bae1-4c4c-8aee-587465a8224c" >
+		<http:listener doc:name="Listener" doc:id="b4da6e53-70df-4119-9cdd-e2d8d8e94fe3" config-ref="HTTP_Listener_config" path="/postFlights"/>
+		<db:insert doc:name="Insert" doc:id="c4868345-702f-4aaf-954f-7e7781c767a0" config-ref="Database_Config">
+			<db:sql ><![CDATA[insert into American(ID,code1,code2,airlineName,toAirport,fromAirport,takeoffDate,price,planeType,seatsAvailable,totalSeats)values(:ID,:code1,:code2,:airlineName,:toAirport,:fromAirport,:takeoffDate,:price,:planeType,:seatsAvailable,:totalSeats)]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{ ID : payload.ID,
+ code1: payload.code,
+ code2: payload.code,
+ airlineName: "american",
+ toAirport: payload.destination,
+ fromAirport: payload.orign,
+ takeoffDate: payload.depaturedate,
+ price: payload.price,
+ planeType: payload.plane.types,
+ seatsAvailable: payload.emptyseats,
+ totalSeats: payload.plane.totalseats
+ }]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="2e935643-c9ce-4778-b7c2-da572bd33d32" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Message" : "Record inserted successfully" ,
+	"Number of Records" : payload.affectedRows
+	}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

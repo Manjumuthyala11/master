@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="getflightsbypayloadFlow" doc:id="9e28f7cf-bf45-4294-bf0f-1a0da4075d28" >
+		<http:listener doc:name="Listener" doc:id="41abd193-e555-4bdf-943e-2d706b6dc215" path="/getFlightsByPaloadID" config-ref="HTTP_Listener_config"/>
+		<db:select doc:name="Select" doc:id="83cae165-423f-4527-9a4f-c1f097b89808" config-ref="Database_Config">
+			<db:sql ><![CDATA[select *from American where ID= :id111]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	id111:payload.id
+}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="de91f61d-b413-4ceb-8782-af8d1f5994c0" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	ID: payload01.ID,
+	code: payload01.code1,
+	price: payload01.price default 0,
+	depaturedate: payload01.takeOffDate as String default "",
+	orign: payload01.fromAirport default "",
+	destination: payload01.toAirport default "",
+	emptyseats: payload01.seatsAvailable default 0,
+	plane: {
+		"type": payload01.planeType default "",
+		totalseats: payload01.totalSeats default 0
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

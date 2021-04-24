@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="sample" format="json">
+      <types:shape format="weave" example="examples/american.json"><![CDATA[%dw 2.0
+
+type sample = Array<{|  ID: Number {"typeId": "int"},   code: String,   price: Number {"typeId": "int"},   depaturedate: String,   orign: String,   destination: String,   emptyseats: Number {"typeId": "int"},   plane: {|    "type": String,     totalseats: Number {"typeId": "int"}  |}|}> {"example": "[{\\\"ID\\\":1,\\\"code\\\":\\\"EWRDE\\\",\\\"price\\\":3232,\\\"depaturedate\\\":\\\"2006\\/23\\/45\\\",\\\"orign\\\":\\\"mufa\\\",\\\"destination\\\":\\\"sfo\\\",\\\"emptyseats\\\":0,\\\"plane\\\":{\\\"type\\\":\\\"Boing 737\\\",\\\"totalseats\\\":121}},{\\\"ID\\\":2,\\\"code\\\":\\\"SWRDE\\\",\\\"price\\\":5232,\\\"depaturedate\\\":\\\"2006\\/22\\/4\\\",\\\"orign\\\":\\\"mufaq\\\",\\\"destination\\\":\\\"sfe\\\",\\\"emptyseats\\\":0,\\\"plane\\\":{\\\"type\\\":\\\"Boing 537\\\",\\\"totalseats\\\":124}}]"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#8e7f7363-2abf-4c19-ab47-538281a3976f">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="sample"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

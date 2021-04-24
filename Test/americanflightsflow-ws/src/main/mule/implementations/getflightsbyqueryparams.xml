@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="getflightsbyqueryparamsFlow" doc:id="97159aad-5428-4fe1-8326-ccefd6ba884d" >
+		<http:listener doc:name="Listener" doc:id="07475e2a-506c-443c-9211-92cafe349696" path="/getFlights" config-ref="HTTP_Listener_config"/>
+		<db:select doc:name="Select" doc:id="e1ec2d6e-c291-4126-8ea3-e24ba4937505" config-ref="Database_Config">
+			<db:sql ><![CDATA[select *from American where ID= :id123]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	id123:attributes.queryParams.id
+}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="3c29ee7e-93a3-4ea7-8cb2-688037b0131d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	ID: payload01.ID,
+	code: payload01.code1,
+	price: payload01.price default 0,
+	depaturedate: payload01.takeOffDate as String default "",
+	orign: payload01.fromAirport default "",
+	destination: payload01.toAirport default "",
+	emptyseats: payload01.seatsAvailable default 0,
+	plane: {
+		"type": payload01.planeType default "",
+		totalseats: payload01.totalSeats default 0
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

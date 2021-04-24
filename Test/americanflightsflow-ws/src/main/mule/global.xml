@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd 
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="25803020-26c7-4753-8f78-6ee0c10e97db" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="3f1fc17a-d7e0-4f89-ab9f-b74e214f3ba3" >
+		<db:my-sql-connection host="${db.hostname}" port="${db.portnumber}" user="${db.username}" password="${db.password}" database="${db.database}" />
+	</db:config>
+	<vm:config name="VM_Config" doc:name="VM Config" doc:id="54ec73cf-369d-4364-9121-6d1ed78e09de" >
+		<vm:queues >
+			<vm:queue queueName="sampleQueue" />
+		</vm:queues>
+	</vm:config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="bb3a2fec-3dbb-46f5-abac-1045af74fd10" >
+		<file:connection workingDir="C:\TestFiles" />
+	</file:config>
+	<configuration-properties doc:name="Configuration properties" doc:id="bbee9ee8-f1c7-472a-b954-345b35789760" file="american_DEV.yaml" />
+	
+	
+</mule>

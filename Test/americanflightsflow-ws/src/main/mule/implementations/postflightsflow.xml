@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="postflightsflowFlow" doc:id="2061c04c-5777-4419-a537-521fbac6cd1a" >
+		<http:listener doc:name="Listener" doc:id="17f5b9ec-fd50-4a43-ae05-765da43bd556" path="/postFlight" config-ref="HTTP_Listener_config"/>
+		<db:insert doc:name="Insert" doc:id="bcd2e751-e4d8-4425-a3b0-005f8a2d64b0" config-ref="Database_Config">
+			<db:sql ><![CDATA[insert into American(ID,code1,code2,airlineName,toAirport,fromAirport,takeoffDate,price,planeType,seatsAvailable,totalSeats)values(:ID,:code1,:code2,:airlineName,:toAirport,:fromAirport,:takeoffDate,:price,:planeType,:seatsAvailable,:totalSeats)]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{ ID : payload.ID,
+ code1: payload.code,
+ code2: payload.code,
+ airlineName: "american",
+ toAirport: payload.destination,
+ fromAirport: payload.orign,
+ takeoffDate: payload.depaturedate,
+ price: payload.price,
+ planeType: payload.plane.types,
+ seatsAvailable: payload.emptyseats,
+ totalSeats: payload.plane.totalseats
+ }]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="2dfcacc0-aa67-4600-9327-cf1fbac63eda" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "record inserted",
+	"Number of Records": payload.affectedRows
+	
+	
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
